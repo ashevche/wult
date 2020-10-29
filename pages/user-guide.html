@@ -93,7 +93,7 @@ sequence is:</p>
 <p><strong>Important</strong>: <em>Wult</em> is a research and debug tool, it loads its own drivers and requires root
 privileges. Do not use it on a production system, use it only in a lab environment.</p>
 <p><em>Wult</em> installation procedure will vary a little bit depending on whether you prefer the local or
-remote usage models (<a class="reference external" href="/index.html#usage-models">details here</a>). In the former case, you install <em>wult</em> on the
+remote usage models (<a class="reference external" href="index.html#usage-models">details here</a>). In the former case, you install <em>wult</em> on the
 SUT (System Under Test). Rn the latter case you install it on the controller. The drivers are
 deployed to the SUT. It is also OK to have both setups at the same time.</p>
 <p>From now on assume the remote usage model. In case of local usage model the &quot;SUT&quot; and &quot;controller&quot;
@@ -247,11 +247,11 @@ pip3 install --user --upgrade git+https://github.com/intel/wult.git&#64;release
 sudo -H pip3 install --upgrade git+https://github.com/intel/wult.git&#64;release
 </pre>
 <p><strong>Important</strong>: you have to re-deploy wult drivers after the update.
-<a class="reference external" href="/index.html#local-usage-model">Local usage model</a>:</p>
+<a class="reference external" href="index.html#local-usage-model">Local usage model</a>:</p>
 <pre class="literal-block">
 sudo wult deploy
 </pre>
-<p><a class="reference external" href="/index.html#remote-usage-model">Remote usage model</a>:</p>
+<p><a class="reference external" href="index.html#remote-usage-model">Remote usage model</a>:</p>
 <pre class="literal-block">
 wult deploy -H SUTNAME
 </pre>
