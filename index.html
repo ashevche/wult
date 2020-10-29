@@ -71,7 +71,7 @@
 <li><a class="reference internal" href="#measurement-methods" id="id6">1.3 Measurement methods</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#usage-models" id="id7">2 Usage models</a><ul>
+<li><a class="reference internal" href="#id1" id="id7">2 Usage models</a><ul>
 <li><a class="reference internal" href="#local-usage" id="id8">2.1 Local usage</a></li>
 <li><a class="reference internal" href="#remote-usage" id="id9">2.2 Remote usage</a></li>
 </ul>
@@ -148,9 +148,9 @@ these also as &quot;<em>nic</em>&quot; and &quot;<em>timer</em>&quot; (or &quot;
 in <a class="reference external" href="#irq-source">this section</a>.</p>
 </div>
 </div>
-<div class="section" id="usage-models">
-<h2><a class="toc-backref" href="#id7">2 Usage models</a></h2>
-<p id="id1">There are 2 <em>wult</em> usage models - <strong>local</strong> and <strong>remote</strong>.</p>
+<div class="section" id="id1">
+<span id="usage-models"></span><h2><a class="toc-backref" href="#id7">2 Usage models</a></h2>
+<p>There are 2 <em>wult</em> usage models - <strong>local</strong> and <strong>remote</strong>.</p>
 <div class="section" id="local-usage">
 <h3><a class="toc-backref" href="#id8">2.1 Local usage</a></h3>
 <img alt="Examples of local wult usage." id="local-usage-model" src="images/wult-local-usage-model.jpg" />
@@ -158,8 +158,8 @@ in <a class="reference external" href="#irq-source">this section</a>.</p>
 the measurement results on the SUT.</p>
 </div>
 <div class="section" id="remote-usage">
-<h3><a class="toc-backref" href="#id9">2.2 Remote usage</a></h3>
-<img alt="Example of remote wult usage." id="remote-usage-model" src="images/wult-remote-usage-model.jpg" />
+<span id="remote-usage-model"></span><h3><a class="toc-backref" href="#id9">2.2 Remote usage</a></h3>
+<img alt="Example of remote wult usage." src="images/wult-remote-usage-model.jpg" />
 <p>In case of local usage model, the user runs <em>wult</em> on the controller. <em>Wult</em> connects to the SUT
 over the network, exercises the SUT, and stores the results on the controller.</p>
 <p>In the remote usage model a single controller may exercise many SUTs at the same time (multiple
@@ -185,8 +185,8 @@ network and the user is logged in via a physically attached keyboard and monitor
 dedicated to <em>wult</em>. The user is logged in via SSH.</p>
 </div>
 <div class="section" id="interrupt-source">
-<h2><a class="toc-backref" href="#id11">4 Interrupt source</a></h2>
-<p id="irq-source">Measuring C-state wake latency is based on delayed interrupts, and today <em>wult</em> supports
+<span id="irq-source"></span><h2><a class="toc-backref" href="#id11">4 Interrupt source</a></h2>
+<p>Measuring C-state wake latency is based on delayed interrupts, and today <em>wult</em> supports
 two delayed interrupt sources: <em>nic</em> and <em>timer</em>.</p>
 <div class="section" id="timer">
 <h3><a class="toc-backref" href="#id12">4.1 Timer</a></h3>
