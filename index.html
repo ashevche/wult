@@ -43,7 +43,8 @@
                     <div class="navbar-inner">
                         <ul class="nav">
                             <li ><a href="/wult/index.html">Overview</a></li>
-                            <li ><a href="/wult/pages/user-guide.html">User Guide</a></li>
+                            <li ><a href="/wult/pages/install-guide.html">Install</a></li>
+                            <li ><a href="/wult/pages/user-guide.html">Use</a></li>
                             <li ><a href="/wult/pages/ndl.html">Ndl</a></li>
                         </ul>
 
@@ -100,8 +101,8 @@ in a C-state. However, this is a much more of a &quot;niche&quot; tool documente
 </ul>
 <p><strong>Important note</strong>: both <em>wult</em> and ndl are research, debugging and tracing tools which require
 superuser privileges and must not be used in production environment.</p>
-<p>The documentation for this project is scarce and imperfect, but we are improving it over time.
-Feel free to make specific requests or ask questions by filing GitHub issues or e-mailing
+<p>The documentation for this project is imperfect, but we are improving it over time. Feel free to
+make specific requests or ask questions by filing GitHub issues (preferred) or sending an e-mail to
 Artem Bityutskiy &lt;<a class="reference external" href="mailto:dedekind1&#64;gmail.com">dedekind1&#64;gmail.com</a>&gt;.</p>
 <div class="section" id="wult-presentation">
 <h2><a class="toc-backref" href="#id3">1 Wult presentation</a></h2>
@@ -152,8 +153,8 @@ in <a class="reference external" href="#irq-source">this section</a>.</p>
 <span id="usage-models"></span><h2><a class="toc-backref" href="#id7">2 Usage models</a></h2>
 <p>There are 2 <em>wult</em> usage models - <strong>local</strong> and <strong>remote</strong>.</p>
 <div class="section" id="local-usage">
-<h3><a class="toc-backref" href="#id8">2.1 Local usage</a></h3>
-<img alt="Examples of local wult usage." id="local-usage-model" src="images/wult-local-usage-model.jpg" />
+<span id="local-usage-model"></span><h3><a class="toc-backref" href="#id8">2.1 Local usage</a></h3>
+<img alt="Examples of local wult usage." src="images/wult-local-usage-model.jpg" />
 <p>In case of local usage model, the user runs <em>wult</em> on the SUT. <em>Wult</em> measures the SUT and stores
 the measurement results on the SUT.</p>
 </div>
@@ -221,7 +222,7 @@ certain value.</p>
 <p>Both NIC and timer methods measure CPU C-state latency, and they may produce similar or different
 result depending various factors. Let's look at some of them.</p>
 <div class="section" id="c-state-pre-wake">
-<h4><a class="toc-backref" href="#id15">4.3.1 C-state pre-wake</a></h4>
+<span id="c-state-prewake"></span><h4><a class="toc-backref" href="#id15">4.3.1 C-state pre-wake</a></h4>
 <p>Some Intel CPUs have able to pre-wake the CPU from a C-state if there is a timer firing soon.
 The P-unit on such systems is timer-aware and optimizes some of the C-states. Not every Intel chip,
 however, has this feature.</p>
