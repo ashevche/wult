@@ -90,7 +90,7 @@ sequence is:</p>
 privileges. Do not use it on a production system, use it only in a lab environment.</p>
 <p><em>Wult</em> installation procedure will vary a little bit depending on whether you prefer the local or
 remote usage models (<a class="reference external" href="../index.html#usage-models">details here</a>). In the former case, you install <em>wult</em> on the
-SUT (System Under Test). Rn the latter case you install it on the controller. The drivers are
+SUT (System Under Test). In the latter case you install it on the controller. The drivers are
 deployed to the SUT. It is also OK to have both setups at the same time.</p>
 <p>From now on assume the remote usage model. In case of local usage model the &quot;SUT&quot; and &quot;controller&quot;
 are the same system. Here are the main installation steps.</p>
@@ -149,7 +149,7 @@ the SUT: gcc, make, etc. The controller must have python version 3.6 or higher i
 drivers are built on the SUT, therefore you should install kernel sources on the SUT. Note, just
 user-space headers is not enough, you should install the actual kernel sources.</p>
 <p>On Fedora and Ubuntu, the sources are typically located in &quot;/lib/modules/&lt;kernel_version&gt;/build&quot;.
-The &quot;&lt;kernel_version&gt;&quot; part must match the kernel running on the SUT. In other words, it has to me
+The &quot;&lt;kernel_version&gt;&quot; part must match the kernel running on the SUT. In other words, it has to be
 the same as what the &quot;uname -r&quot; command prints when you run it on the SUT.</p>
 <p>Unless you are an advanced user, you probably run a stock OS kernel on the SUT. In this case, it is
 enough to just install the kernel sources package provided by the OS, e.g.:
@@ -197,20 +197,18 @@ their git repository (see below). Otherwise it is not necessary.</li>
 </div>
 <div class="section" id="install-wult">
 <h2><a class="toc-backref" href="#id6">1.3 Install wult</a></h2>
-<p><em>Wult</em> is written in python version 3 and the easiest way of installing it is by using the &quot;pip3&quot; tool.
+<p><em>Wult</em> is written in python version 3 and the easiest way of installing it is by using the &quot;pip&quot; tool.
 Advanced users can chose any other way of using/installing python code, e.g., just clone the git
-repositories and configure &quot;PYTHONPATH&quot;. But there will be more caveats in this case.</p>
-<p>Here is how to install <em>wult</em> directly from the git repository using the &quot;pip3&quot; tool. To install to
+repositories and configure &quot;PYTHONPATH&quot;. But there will be more caveats in this case, and it is
+only recommended for advanced users.</p>
+<p>Here is how to install <em>wult</em> directly from the git repository using the &quot;pip&quot; tool. To install to
 your home directory, run:</p>
 <pre class="literal-block">
-pip3 install --user git+https://github.com/intel/wult.git&#64;release
-</pre>
-<p>To install to the system, run:</p>
-<pre class="literal-block">
-sudo -H pip3 install git+https://github.com/intel/wult.git&#64;release
+pip install --user --upgrade git+https://github.com/intel/wult.git&#64;release
 </pre>
 <p>This will install <em>wult</em> from the &quot;release&quot; branch of the git repository. The &quot;release&quot; branch
 contains more stable code. To install the latest code, use the &quot;master&quot; branch instead.</p>
+<p>If you prefer installing to the system, remove the '--user' option.</p>
 </div>
 <div class="section" id="deploy-wult-drivers">
 <h2><a class="toc-backref" href="#id7">1.4 Deploy wult drivers</a></h2>
@@ -229,17 +227,20 @@ wult deploy -H SUTNAME
 the SUT (network host name is 'SUTNAME'), copy <em>wult</em> driver sources from the controller to the SUT,
 build them on the SUT, then deploy them to the SUT.</p>
 <p>Please, check 'wult deploy -h' for advanced usage options.</p>
+<p><strong>*Note*</strong></p>
+<p>The &quot;wult deploy&quot; command installs drivers only to the currently running kernel. If you reboot
+your system to a different kernel, you have to re-run &quot;wult deploy&quot;. It is on per-kernel basis.</p>
 </div>
 <div class="section" id="update">
 <h2><a class="toc-backref" href="#id8">2 Update</a></h2>
 <p>If you installed <em>wult</em> using the 'pip' tool, you can use 'pip' to update it as well.
 Here is how to update <em>wult</em> in case you installed it to your home directory.</p>
 <pre class="literal-block">
-pip3 install --user --upgrade git+https://github.com/intel/wult.git&#64;release
+pip install --user --upgrade git+https://github.com/intel/wult.git&#64;release
 </pre>
 <p>And in case you installed it to the system.</p>
 <pre class="literal-block">
-sudo -H pip3 install --upgrade git+https://github.com/intel/wult.git&#64;release
+sudo -H pip install --upgrade git+https://github.com/intel/wult.git&#64;release
 </pre>
 <p><strong>Important</strong>: you have to re-deploy wult drivers after the update.
 <a class="reference external" href="../index.html#local-usage-model">Local usage model</a>:</p>

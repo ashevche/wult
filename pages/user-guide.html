@@ -88,7 +88,7 @@ SUT as 'root'. In case of <a class="reference external" href="../index.html#remo
 run on the controller under unprivileged user, but the user should have passwordless root SSH login
 from the controller to the SUT (more info in <a class="reference external" href="install-guide.html#passwordless-ssh">this</a> section).</p>
 <p>The command line arguments for the both cases is the same, except for the '-H SUTNAME' option in the
-remote usage case, which specifies the SUT host name to connect to.</p>
+remote usage scenario, which specifies the SUT host name to connect to.</p>
 </div>
 <div class="section" id="scan-for-supported-devices">
 <h2><a class="toc-backref" href="#id2">2. Scan for supported devices</a></h2>
@@ -101,8 +101,8 @@ sudo wult scan
 <pre class="literal-block">
 wult scan -H SUTNAME
 </pre>
-<p>From this point onward, we'll assume the reader already figured out the local vs remote usage mode
-difference, and we'll just recommend to run:</p>
+<p>We'll assume the reader distinguishes between the local and remote usage models, so we'll just
+recommend to run the following command for simplicity:</p>
 <pre class="literal-block">
 wult scan
 </pre>

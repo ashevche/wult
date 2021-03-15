@@ -66,25 +66,25 @@
 <div class="contents topic" id="table-of-contents">
 <p class="topic-title">Table of Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#wult-presentation" id="id3">1 Wult presentation</a></li>
-<li><a class="reference internal" href="#principle-of-operation" id="id4">1 Principle of operation</a><ul>
-<li><a class="reference internal" href="#measured-cpu" id="id5">1.2. Measured CPU</a></li>
-<li><a class="reference internal" href="#measurement-methods" id="id6">1.3 Measurement methods</a></li>
+<li><a class="reference internal" href="#wult-presentation" id="id5">1 Wult presentation</a></li>
+<li><a class="reference internal" href="#principle-of-operation" id="id6">1 Principle of operation</a><ul>
+<li><a class="reference internal" href="#measured-cpu" id="id7">1.2. Measured CPU</a></li>
+<li><a class="reference internal" href="#measurement-methods" id="id8">1.3 Measurement methods</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#id1" id="id7">2 Usage models</a><ul>
-<li><a class="reference internal" href="#local-usage" id="id8">2.1 Local usage</a></li>
-<li><a class="reference internal" href="#remote-usage" id="id9">2.2 Remote usage</a></li>
+<li><a class="reference internal" href="#id1" id="id9">2 Usage models</a><ul>
+<li><a class="reference internal" href="#id2" id="id10">2.1 Local usage model</a></li>
+<li><a class="reference internal" href="#id3" id="id11">2.2 Remote usage model</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#the-hardware-setup" id="id10">3 The hardware setup</a></li>
-<li><a class="reference internal" href="#interrupt-source" id="id11">4 Interrupt source</a><ul>
-<li><a class="reference internal" href="#timer" id="id12">4.1 Timer</a></li>
-<li><a class="reference internal" href="#nic" id="id13">4.2 Nic</a></li>
-<li><a class="reference internal" href="#timer-vs-nic" id="id14">4.3 Timer vs Nic</a><ul>
-<li><a class="reference internal" href="#c-state-pre-wake" id="id15">4.3.1 C-state pre-wake</a></li>
-<li><a class="reference internal" href="#pcie-aspm" id="id16">4.3.2 PCIe ASPM</a></li>
-<li><a class="reference internal" href="#pci-topology" id="id17">4.3.3 PCI topology</a></li>
+<li><a class="reference internal" href="#the-hardware-setup" id="id12">3 The hardware setup</a></li>
+<li><a class="reference internal" href="#interrupt-source" id="id13">4 Interrupt source</a><ul>
+<li><a class="reference internal" href="#timer" id="id14">4.1 Timer</a></li>
+<li><a class="reference internal" href="#nic" id="id15">4.2 Nic</a></li>
+<li><a class="reference internal" href="#timer-vs-nic" id="id16">4.3 Timer vs Nic</a><ul>
+<li><a class="reference internal" href="#c-state-pre-wake" id="id17">4.3.1 C-state pre-wake</a></li>
+<li><a class="reference internal" href="#pcie-aspm" id="id18">4.3.2 PCIe ASPM</a></li>
+<li><a class="reference internal" href="#pci-topology" id="id19">4.3.3 PCI topology</a></li>
 </ul>
 </li>
 </ul>
@@ -105,7 +105,7 @@ superuser privileges and must not be used in production environment.</p>
 make specific requests or ask questions by filing GitHub issues (preferred) or sending an e-mail to
 Artem Bityutskiy &lt;<a class="reference external" href="mailto:dedekind1&#64;gmail.com">dedekind1&#64;gmail.com</a>&gt;.</p>
 <div class="section" id="wult-presentation">
-<h2><a class="toc-backref" href="#id3">1 Wult presentation</a></h2>
+<h2><a class="toc-backref" href="#id5">1 Wult presentation</a></h2>
 <p><a class="reference external" href="https://youtu.be/Opk92aQyvt0?t=8270">Here is a video recording of wult presentation</a>
 by Artem Bityutskiy at Linux Plumbers Conference in 2019. The presentation begins at &quot;2:17:50&quot; and
 it gives a high level <em>wult</em> introduction.</p>
@@ -118,7 +118,7 @@ so it will work on any modern x86 system even without an Intel I210 NIC.</li>
 </ul>
 </div>
 <div class="section" id="principle-of-operation">
-<h2><a class="toc-backref" href="#id4">1 Principle of operation</a></h2>
+<h2><a class="toc-backref" href="#id6">1 Principle of operation</a></h2>
 <p>Here is how <em>wult</em> works at a very high level.</p>
 <ol class="arabic simple">
 <li>Schedule a delayed interrupt to happen at future time <em>LaunchTime</em>.</li>
@@ -132,13 +132,13 @@ process will take some time.</li>
 file. <em>Wult</em> provides a capability for analyzing the CSV file (finding the median, percentiles, etc)
 as well as a capability for visualizing the test results (scatter plots, histograms).</p>
 <div class="section" id="measured-cpu">
-<h3><a class="toc-backref" href="#id5">1.2. Measured CPU</a></h3>
+<h3><a class="toc-backref" href="#id7">1.2. Measured CPU</a></h3>
 <p>By default, <em>wult</em> measures C-state latency of CPU 0 (the first CPU you'll see in '/proc/cpuinfo').
 The delayed interrupts are affinitized to the measured CPU. However, you can measure any other
 CPU as well - there is a command line option for this. But only one CPU is measured at a time.</p>
 </div>
 <div class="section" id="measurement-methods">
-<h3><a class="toc-backref" href="#id6">1.3 Measurement methods</a></h3>
+<h3><a class="toc-backref" href="#id8">1.3 Measurement methods</a></h3>
 <p>Today <em>wult</em> supports two delayed interrupt sources: <em>nic</em> and <em>timer</em>.</p>
 <ol class="arabic simple">
 <li>Timer - the interrupt comes from the Local APIC timer block of the measured CPU.</li>
@@ -150,28 +150,28 @@ in <a class="reference external" href="#irq-source">this section</a>.</p>
 </div>
 </div>
 <div class="section" id="id1">
-<span id="usage-models"></span><h2><a class="toc-backref" href="#id7">2 Usage models</a></h2>
+<span id="usage-models"></span><h2><a class="toc-backref" href="#id9">2 Usage models</a></h2>
 <p>There are 2 <em>wult</em> usage models - <strong>local</strong> and <strong>remote</strong>.</p>
-<div class="section" id="local-usage">
-<span id="local-usage-model"></span><h3><a class="toc-backref" href="#id8">2.1 Local usage</a></h3>
+<div class="section" id="id2">
+<span id="local-usage-model"></span><h3><a class="toc-backref" href="#id10">2.1 Local usage model</a></h3>
 <img alt="Examples of local wult usage." src="images/wult-local-usage-model.jpg" />
 <p>In case of local usage model, the user runs <em>wult</em> on the SUT. <em>Wult</em> measures the SUT and stores
 the measurement results on the SUT.</p>
 </div>
-<div class="section" id="remote-usage">
-<span id="remote-usage-model"></span><h3><a class="toc-backref" href="#id9">2.2 Remote usage</a></h3>
+<div class="section" id="id3">
+<span id="remote-usage-model"></span><h3><a class="toc-backref" href="#id11">2.2 Remote usage model</a></h3>
 <img alt="Example of remote wult usage." src="images/wult-remote-usage-model.jpg" />
 <p>In case of local usage model, the user runs <em>wult</em> on the controller. <em>Wult</em> connects to the SUT
 over the network, exercises the SUT, and stores the results on the controller.</p>
 <p>In the remote usage model a single controller may exercise many SUTs at the same time (multiple
-instances of <em>wult</em> running simultaneously). The can be stored at the same place on the controller.</p>
+instances of <em>wult</em> running simultaneously).</p>
 </div>
 </div>
 <div class="section" id="the-hardware-setup">
-<h2><a class="toc-backref" href="#id10">3 The hardware setup</a></h2>
+<h2><a class="toc-backref" href="#id12">3 The hardware setup</a></h2>
 <p>Since the CPU is already equipped with timers, the &quot;<em>timer</em>&quot; measurement method does not require
-anything special. Just run wult in local or remote modes. In case of the &quot;<em>nic</em>&quot; method, the SUT
-(System Under Test) should have an Intel I210 NIC.</p>
+anything special. In case of the &quot;<em>nic</em>&quot; method, the SUT (System Under Test) should have an Intel
+I210 NIC installed.</p>
 <p>Intel I210 is a 1GbE network chip, several vendors ship (or shipped) network cards based on I210.
 For example, we use the HP I210-T1 Network Adapter (E0X95AA).</p>
 <p>Plug the network card to an appropriate PCIe slot (check <a class="reference external" href="#irq-source">this section</a>). You do not
@@ -186,11 +186,11 @@ network and the user is logged in via a physically attached keyboard and monitor
 dedicated to <em>wult</em>. The user is logged in via SSH.</p>
 </div>
 <div class="section" id="interrupt-source">
-<span id="irq-source"></span><h2><a class="toc-backref" href="#id11">4 Interrupt source</a></h2>
+<span id="irq-source"></span><h2><a class="toc-backref" href="#id13">4 Interrupt source</a></h2>
 <p>Measuring C-state wake latency is based on delayed interrupts, and today <em>wult</em> supports
 two delayed interrupt sources: <em>nic</em> and <em>timer</em>.</p>
 <div class="section" id="timer">
-<h3><a class="toc-backref" href="#id12">4.1 Timer</a></h3>
+<h3><a class="toc-backref" href="#id14">4.1 Timer</a></h3>
 <p>In case of the &quot;timer&quot; interrupt source <em>wult</em> uses the CPU timers for scheduling delayed interrupts.
 On most modern Intel chips every core has a LAPIC block which provides the capability of arming
 timers for this core. Wult uses the &quot;TSC deadline timers&quot; LAPIC capability to arm delayed interrupts
@@ -198,15 +198,15 @@ that fire at a very precise moment in the future. This is why <em>wult</em>'s &q
 is also referred to as &quot;<em>tdt</em>&quot; (TSC Deadline Timer).</p>
 <img alt="Timer interrupt illustration." src="images/wult-irq-source-timer.jpg" />
 <p>The picture illustrates a timer interrupt on an Intel Xeon chip. The chip contains many cores,
-but only one core is being measured (in case of hyper-threading, on hyper-thread within the core is
-measured). This core has a LAPIC block, and the interrupt is generated by LAPIC.</p>
+but only one core is being measured (if hyper-threading is enabled, one hyper-thread is measured).
+This core has the LAPIC block, and the interrupt is generated by LAPIC.</p>
 <p>Just for reference: MC is a Memory Controller, LLC is the last level cache (shared between the
 cores). P-unit is a microcontroller that is responsible for power and performance features like
 C-states, P-states, etc. This is just an example, and different Intel chips have a different
 design.</p>
 </div>
 <div class="section" id="nic">
-<h3><a class="toc-backref" href="#id13">4.2 Nic</a></h3>
+<h3><a class="toc-backref" href="#id15">4.2 Nic</a></h3>
 <p>In case of the &quot;nic&quot; interrupt source the interrupts are generated by a PCIe network card (NIC).</p>
 <img alt="NIC interrupt illustration." src="images/wult-irq-source-nic.jpg" />
 <p>Notice that the interrupt source is much further from the measured core in this case. The interrupt
@@ -218,11 +218,11 @@ the CPU. The CPU can program the NIC to generate an interrupt when NIC's clock c
 certain value.</p>
 </div>
 <div class="section" id="timer-vs-nic">
-<h3><a class="toc-backref" href="#id14">4.3 Timer vs Nic</a></h3>
+<h3><a class="toc-backref" href="#id16">4.3 Timer vs Nic</a></h3>
 <p>Both NIC and timer methods measure CPU C-state latency, and they may produce similar or different
 result depending various factors. Let's look at some of them.</p>
 <div class="section" id="c-state-pre-wake">
-<span id="c-state-prewake"></span><h4><a class="toc-backref" href="#id15">4.3.1 C-state pre-wake</a></h4>
+<span id="c-state-prewake"></span><h4><a class="toc-backref" href="#id17">4.3.1 C-state pre-wake</a></h4>
 <p>Some Intel CPUs have able to pre-wake the CPU from a C-state if there is a timer firing soon.
 The P-unit on such systems is timer-aware and optimizes some of the C-states. Not every Intel chip,
 however, has this feature.</p>
@@ -244,7 +244,7 @@ result we locked CPU frequency to HFM, so CPU frequency transitions were disable
 </ul>
 </div>
 <div class="section" id="pcie-aspm">
-<h4><a class="toc-backref" href="#id16">4.3.2 PCIe ASPM</a></h4>
+<h4><a class="toc-backref" href="#id18">4.3.2 PCIe ASPM</a></h4>
 <p>PCIe ASPM (Active State Power Management) is a PCIe power management feature, described in PCIe
 specifications and supported by many Intel chips. This feature is about PCI links power management -
 when a link is not used, it can be sent into a low power state such as L1. In this state the link
@@ -260,7 +260,7 @@ C-state was C6. The median wake latency is 82.6us (ASPM on) and 73.8us (ASPM off
 PCIe ASPM adds about 8.8 microseconds to the median.</p>
 </div>
 <div class="section" id="pci-topology">
-<h4><a class="toc-backref" href="#id17">4.3.3 PCI topology</a></h4>
+<h4><a class="toc-backref" href="#id19">4.3.3 PCI topology</a></h4>
 <p>In case of the &quot;nic&quot; measurement method, the location of the NIC in the PCIe matters. E.g., consider
 a 2-socket server system with the following PCIe slots.</p>
 <ul class="simple">
