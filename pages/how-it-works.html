@@ -59,18 +59,20 @@
 <li><a class="reference internal" href="#principle-of-operation" id="toc-entry-1">1 Principle of operation</a><ul>
 <li><a class="reference internal" href="#measured-cpu" id="toc-entry-2">1.2. Measured CPU</a></li>
 <li><a class="reference internal" href="#measurement-methods" id="toc-entry-3">1.3 Measurement methods</a></li>
+<li><a class="reference internal" href="#idle-states-with-interrupts-on-and-off" id="toc-entry-4">1.4 Idle states with interrupts on and off</a></li>
+<li><a class="reference internal" href="#measurement-steps" id="toc-entry-5">1.5 Measurement steps</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#interrupt-source" id="toc-entry-4">2 Interrupt source</a><ul>
-<li><a class="reference internal" href="#timer" id="toc-entry-5">2.1 Timer</a></li>
-<li><a class="reference internal" href="#nic" id="toc-entry-6">2.2 NIC</a></li>
-<li><a class="reference internal" href="#timer-vs-nic" id="toc-entry-7">2.3 Timer vs Nic</a><ul>
-<li><a class="reference internal" href="#pcie-aspm" id="toc-entry-8">2.3.1 PCIe ASPM</a><ul>
-<li><a class="reference internal" href="#a-word-of-warning" id="toc-entry-9">2.3.1.1 A word of warning</a></li>
+<li><a class="reference internal" href="#interrupt-source" id="toc-entry-6">2 Interrupt source</a><ul>
+<li><a class="reference internal" href="#timer" id="toc-entry-7">2.1 Timer</a></li>
+<li><a class="reference internal" href="#nic" id="toc-entry-8">2.2 NIC</a></li>
+<li><a class="reference internal" href="#timer-vs-nic" id="toc-entry-9">2.3 Timer vs Nic</a><ul>
+<li><a class="reference internal" href="#pcie-aspm" id="toc-entry-10">2.3.1 PCIe ASPM</a><ul>
+<li><a class="reference internal" href="#a-word-of-warning" id="toc-entry-11">2.3.1.1 A word of warning</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#c-state-pre-wake" id="toc-entry-10">2.3.2 C-state pre-wake</a></li>
-<li><a class="reference internal" href="#pci-topology" id="toc-entry-11">2.3.3 PCI topology</a></li>
+<li><a class="reference internal" href="#c-state-pre-wake" id="toc-entry-12">2.3.2 C-state pre-wake</a></li>
+<li><a class="reference internal" href="#pci-topology" id="toc-entry-13">2.3.3 PCI topology</a></li>
 </ul>
 </li>
 </ul>
@@ -120,14 +122,80 @@ delay. However, this method requires an I210 NIC to be installed on the measured
 <p>Please, refer to <a class="reference external" href="#irq-source">this section</a> for more information on how C-state measurement
 results depend on the delayed interrupt source.</p>
 </div>
+<div class="section" id="idle-states-with-interrupts-on-and-off">
+<span id="idle-states-with-irq-on-off"></span><h3><a class="toc-backref" href="#toc-entry-4">1.4 Idle states with interrupts on and off</a></h3>
+<p>Most idle states are entered and exited with interrupts disabled. This means that Linux kernel's
+&quot;cpuidle&quot; subsystem disables idle CPU interrupts before requesting the C-state. On Intel CPUs, a
+C-state is requested using the <tt class="docutils literal">mwait</tt> instruction, so it is executed with interrupts disabled.</p>
+<p>When the CPU exits the C-state, it continues executing the next instruction after <tt class="docutils literal">mwait</tt>. Even if
+the wake event was an interrupt, the CPU does not jump to it just yet. Instead, it runs small amount
+of &quot;cpuidle&quot; subsystem housekeeping code first. Then &quot;cpuidle&quot; enables local CPU interrupts (the
+<tt class="docutils literal">sti</tt> instruction on Intel CPUs), and the CPU jumps to the interrupt handler.</p>
+<p>For this type of idle state, <em>wult</em> measures both wake latency (<em>WakeLatency</em>) and interrupt
+latency (<em>IntrLatency</em>). Wake latency is sampled shortly after <tt class="docutils literal">mwait</tt>, while interrupt latency is
+sampled in the interrupt handler.</p>
+<p>Some idle states are entered with interrupts enabled, such as the 'POLL' state, which <em>wult</em> can
+measure too. Another example would be the C1 C-state on Icelake Xeon platform when the
+<tt class="docutils literal">intel_idle</tt> driver is used. In these cases when the CPU exists the idle state, it jumps to the
+interrupt handler right away.</p>
+<p>For this type of idle state, <em>wult</em> measures only interrupt latency (<em>IntrLatency</em>).</p>
+</div>
+<div class="section" id="measurement-steps">
+<span id="measurement-steps-simple"></span><h3><a class="toc-backref" href="#toc-entry-5">1.5 Measurement steps</a></h3>
+<p>This section will walk you through the main <em>wult</em> measurement cycle steps. The goal is to demonstrate
+the principle of operation, so many details will be omitted.</p>
+<p>Here are the steps for measuring wake latency of a C-state entered with interrupts disabled.</p>
+<img alt="Basic wult measurement steps." src="../images/wult-steps-simple.jpg" />
+<p><strong>Step 1: arm delayed event</strong></p>
+<p>Wult kernel driver arms a delayed event. In case of an <em>hrt</em> or <em>tdt</em> methods, this will be a timer
+event. In case of the <em>nic</em> method, this will be a NIC event.</p>
+<p>The delayed event is armed <em>LDist</em> milliseconds ahead. Driver selects a random <em>LDist</em> a
+user-configurable range (0-4 milliseconds by default).</p>
+<p>The delayed event is armed to happen at time &quot;LaunchTime&quot;, also referred to as <em>LTime</em>.</p>
+<p><strong>Step 2: enter idle state</strong></p>
+<p>Once the delayed interrupt is armed, <em>wult</em> driver just does nothing and waits for it to happen. Since
+<em>wult</em> is supposed to be use on an idle system, the measured CPU will soon start entering an idle
+state, because there is supposedly no tasks to run.</p>
+<p>The CPU runs Linux idle task, which will eventually disable local interrupts and request a C-state
+by executing the <tt class="docutils literal">mwait</tt> instruction.</p>
+<p>Before Linux requests a C-state, <em>wult</em> driver takes the &quot;Time Before Idle&quot; time-stamp, also
+referred to as <em>TBI</em>. In case of the <em>tdt</em> and <em>hrt</em> method, this will be the TSC counter value
+(<tt class="docutils literal">rdtsc</tt> instruction on Intel CPUs). In case of a <em>nic</em> method, this will be the NIC's time stamp
+counter value.</p>
+<p>Once the <tt class="docutils literal">mwait</tt> instruction is executed, CPU enters a C-state and does not execute more
+instructions. Instead, the CPU waits for an event and saves power.</p>
+<p>Note, if CPU never enters an idle state during the <em>LTime</em> period of time, delayed interrupt fires
+while the CPU is not idle (C0 state), the results of experiment are discarded and <em>wult</em> driver
+repeats Step 1.</p>
+<p><strong>Step 3: delayed event</strong></p>
+<p>When the delayed event happens, the CPU starts exiting the C-state. This will take some time. Deeper
+C-states (e.g., C6 on Intel CPUs) will result in longer exit latency than shallower C-states, such
+as C1.</p>
+<p><strong>Step 4: resume execution</strong></p>
+<p>Eventually the CPU will resume instructions execution starting from the first instruction after
+<tt class="docutils literal">mwait</tt>. Shortly after this <em>wult</em> driver will take the &quot;Time After Idle&quot; time-stamp, also
+referred to as &quot;<em>TAI</em>&quot;.</p>
+<p><strong>Step 5: wake latency</strong></p>
+<p><em>Wult</em> driver will send the datapoint (<em>TAI</em>, <em>TBI</em> and other data) to user-space and start a new
+experiment, also referred to as a &quot;measurement cycle&quot;.</p>
+<p><em>Wult</em> user-space components will eventually receive the datapoint, calculate <em>SilentTime</em> and
+<em>WakeLatency</em>, and save them in a CSV file.</p>
+<p>The process is repeated until <em>wult</em> collects the required amount of datapoints.</p>
+<p><em>SilentTime</em> = <em>LTime</em> - <em>TBI</em>, and this is the time between <tt class="docutils literal">mwait</tt> and the delayed event, modulo
+the <em>TBI</em> overhead (it takes time to get <em>TBI</em>, and there are other instructions between <em>TBI</em> read
+and <tt class="docutils literal">mwait</tt>).</p>
+<p><em>WakeLatency</em> = <em>TAI</em> - <em>LTime</em>, and this is the time between the delayed event and CPU execution
+resume, modulo the <em>TAI</em> overhead (it takes time to get <em>TAI</em>, and there are other instructions
+between the first executed instruction and the <em>TAI</em> read).</p>
+</div>
 </div>
 <div class="section" id="interrupt-source">
-<span id="irq-source"></span><h2><a class="toc-backref" href="#toc-entry-4">2 Interrupt source</a></h2>
+<span id="irq-source"></span><h2><a class="toc-backref" href="#toc-entry-6">2 Interrupt source</a></h2>
 <p>Measuring C-state wake latency is based on delayed interrupts, and today <em>wult</em> supports
 two delayed interrupt sources: TSC deadline timer/LAPIC timer (<em>hrt</em> and <em>tdt</em> methods) and
 Intel I210 PCIe NIC (<em>nic</em> method).</p>
 <div class="section" id="timer">
-<h3><a class="toc-backref" href="#toc-entry-5">2.1 Timer</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-7">2.1 Timer</a></h3>
 <p>In case of the <em>hrt</em> and <em>tdt</em> <em>wult</em> measurement methods, the delayed events are scheduled by simply
 arming a local CPU timer.</p>
 <p>All modern Intel CPUs support the TSC deadline timer feature, which is provided by the LAPIC block.
@@ -149,7 +217,7 @@ between the cores). P-unit is a microcontroller responsible for power and perfor
 C-states, P-states, etc.</p>
 </div>
 <div class="section" id="nic">
-<h3><a class="toc-backref" href="#toc-entry-6">2.2 NIC</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-8">2.2 NIC</a></h3>
 <p>In case of the <em>nic</em> <em>wult</em> method, the delayed interrupt source is the Intel I210 PCIe network card
 (NIC).</p>
 <img alt="NIC interrupt illustration." src="../images/wult-irq-source-nic.jpg" />
@@ -162,11 +230,11 @@ the CPU. The CPU can program the NIC to generate an interrupt when NIC's clock c
 certain value.</p>
 </div>
 <div class="section" id="timer-vs-nic">
-<h3><a class="toc-backref" href="#toc-entry-7">2.3 Timer vs Nic</a></h3>
+<h3><a class="toc-backref" href="#toc-entry-9">2.3 Timer vs Nic</a></h3>
 <p>Both <em>hrt</em>/<em>tdt</em> and <em>nic</em> methods measure CPU C-state latency, and they may produce similar or
 different results depending various factors. Let's look at some of them.</p>
 <div class="section" id="pcie-aspm">
-<span id="c-state-prewake"></span><h4><a class="toc-backref" href="#toc-entry-8">2.3.1 PCIe ASPM</a></h4>
+<h4><a class="toc-backref" href="#toc-entry-10">2.3.1 PCIe ASPM</a></h4>
 <p>PCIe ASPM (Active State Power Management) is a PCIe power management feature, described in PCIe
 specifications and supported by many Intel chips. This feature is about PCI links power management -
 when a link is not used, it can be sent into a low power state such as L1. In this state the link
@@ -190,7 +258,7 @@ we locked CPU frequency to HFM, so CPU frequency transitions were disabled.</li>
 <li>noaspm - PCIe ASPM was disabled.</li>
 </ul>
 <div class="section" id="a-word-of-warning">
-<span id="i210-warning"></span><h5><a class="toc-backref" href="#toc-entry-9">2.3.1.1 A word of warning</a></h5>
+<span id="i210-warning"></span><h5><a class="toc-backref" href="#toc-entry-11">2.3.1.1 A word of warning</a></h5>
 <p>The Intel I210 network card is a relatively old design - it is a PCIe Gen 2 card, while modern Intel
 CPUs are PCIe Gen 4 and Gen 5. Therefore, this network card may not be a perfect device for
 measuring PCI-related delays. We did not have time to support a more modern NIC, but this should
@@ -198,7 +266,7 @@ generally be possible.</p>
 </div>
 </div>
 <div class="section" id="c-state-pre-wake">
-<h4><a class="toc-backref" href="#toc-entry-10">2.3.2 C-state pre-wake</a></h4>
+<span id="c-state-prewake"></span><h4><a class="toc-backref" href="#toc-entry-12">2.3.2 C-state pre-wake</a></h4>
 <p>Some Intel CPUs have able to pre-wake the CPU from a C-state if there is a timer firing soon.
 The P-unit on such systems is timer-aware and optimizes some of the C-states. Not every Intel chip,
 however, has this feature.</p>
@@ -210,10 +278,10 @@ measurement methods. The deepest C-state was C6. Notice that the median wake lat
 and 17.6us (timer). The timer method shows about 76% latency reduction.</p>
 <p>Note, you can disable the pre-wake feature and measure the &quot;unoptimized&quot; C-state latency even with
 the <em>hrt</em> or <em>tdt</em> methods (e.g., verified on IceLake Xeon). You can do this using the
-<a class="reference external" href="https://github.com/intel/pepc">pepc tool</a>.</p>
+&quot;<tt class="docutils literal"><span class="pre">--cstate-prewake</span></tt>&quot; option of the <a class="reference external" href="https://github.com/intel/pepc">pepc</a> tool.</p>
 </div>
 <div class="section" id="pci-topology">
-<h4><a class="toc-backref" href="#toc-entry-11">2.3.3 PCI topology</a></h4>
+<h4><a class="toc-backref" href="#toc-entry-13">2.3.3 PCI topology</a></h4>
 <p>When using the <em>nic</em> measurement method, the location of the NIC in the PCIe matters. E.g., consider
 a 2-socket server system with the following PCIe slots.</p>
 <ul class="simple">
