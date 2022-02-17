@@ -141,52 +141,66 @@ interrupt handler right away.</p>
 <p>For this type of idle state, <em>wult</em> measures only interrupt latency (<em>IntrLatency</em>).</p>
 </div>
 <div class="section" id="measurement-steps">
-<span id="measurement-steps-simple"></span><h3><a class="toc-backref" href="#toc-entry-5">1.5 Measurement steps</a></h3>
+<span id="measurement-steps-simple-introff"></span><h3><a class="toc-backref" href="#toc-entry-5">1.5 Measurement steps</a></h3>
 <p>This section will walk you through the main <em>wult</em> measurement cycle steps. The goal is to demonstrate
 the principle of operation, so many details will be omitted.</p>
 <p>Here are the steps for measuring wake latency of a C-state entered with interrupts disabled.</p>
-<img alt="Basic wult measurement steps." src="../images/wult-steps-simple.jpg" />
+<img alt="Basic wult measurement steps for C-states entered with interrupts disabled." src="../images/wult-steps-simple-introff.jpg" />
 <p><strong>Step 1: arm delayed event</strong></p>
 <p>Wult kernel driver arms a delayed event. In case of an <em>hrt</em> or <em>tdt</em> methods, this will be a timer
 event. In case of the <em>nic</em> method, this will be a NIC event.</p>
-<p>The delayed event is armed <em>LDist</em> milliseconds ahead. Driver selects a random <em>LDist</em> a
-user-configurable range (0-4 milliseconds by default).</p>
+<p>The delayed event is armed <em>LDist</em> milliseconds ahead. Driver selects a random <em>LDist</em> value in
+a user-configurable range (0-4 milliseconds by default).</p>
 <p>The delayed event is armed to happen at time &quot;LaunchTime&quot;, also referred to as <em>LTime</em>.</p>
 <p><strong>Step 2: enter idle state</strong></p>
 <p>Once the delayed interrupt is armed, <em>wult</em> driver just does nothing and waits for it to happen. Since
-<em>wult</em> is supposed to be use on an idle system, the measured CPU will soon start entering an idle
-state, because there is supposedly no tasks to run.</p>
-<p>The CPU runs Linux idle task, which will eventually disable local interrupts and request a C-state
-by executing the <tt class="docutils literal">mwait</tt> instruction.</p>
+<em>wult</em> is supposed to be used on an idle system, the measured CPU most probably start entering an idle
+state, because there are supposedly no tasks to run.</p>
+<p>The CPU runs Linux idle task, which eventually disables local interrupts (the <tt class="docutils literal">cli</tt> instruction on
+Intel CPUs) and requests a C-state by executing the <tt class="docutils literal">mwait</tt> instruction.</p>
 <p>Before Linux requests a C-state, <em>wult</em> driver takes the &quot;Time Before Idle&quot; time-stamp, also
-referred to as <em>TBI</em>. In case of the <em>tdt</em> and <em>hrt</em> method, this will be the TSC counter value
-(<tt class="docutils literal">rdtsc</tt> instruction on Intel CPUs). In case of a <em>nic</em> method, this will be the NIC's time stamp
-counter value.</p>
+referred to as <em>TBI</em>. In case of the <em>tdt</em> and <em>hrt</em> methods, this is the TSC counter value
+(the <tt class="docutils literal">rdtsc</tt> instruction on Intel CPUs). In case of the <em>nic</em> method, this is the NIC's own,
+independent time stamp counter value.</p>
 <p>Once the <tt class="docutils literal">mwait</tt> instruction is executed, CPU enters a C-state and does not execute more
 instructions. Instead, the CPU waits for an event and saves power.</p>
-<p>Note, if CPU never enters an idle state during the <em>LTime</em> period of time, delayed interrupt fires
-while the CPU is not idle (C0 state), the results of experiment are discarded and <em>wult</em> driver
-repeats Step 1.</p>
+<p>Note, if CPU never enters an idle state during the <em>LTime</em> period of time, the delayed interrupt
+fires while the CPU is not idle (C0 state). In this case the result of experiment is discarded and
+<em>wult</em> driver repeats Step 1.</p>
 <p><strong>Step 3: delayed event</strong></p>
-<p>When the delayed event happens, the CPU starts exiting the C-state. This will take some time. Deeper
-C-states (e.g., C6 on Intel CPUs) will result in longer exit latency than shallower C-states, such
-as C1.</p>
+<p>When the delayed event happens, the CPU starts exiting the C-state. This takes some time. Deeper
+C-states (e.g., C6 on Intel CPUs) result in longer exit latency than shallower C-states, such as
+C1.</p>
 <p><strong>Step 4: resume execution</strong></p>
-<p>Eventually the CPU will resume instructions execution starting from the first instruction after
-<tt class="docutils literal">mwait</tt>. Shortly after this <em>wult</em> driver will take the &quot;Time After Idle&quot; time-stamp, also
-referred to as &quot;<em>TAI</em>&quot;.</p>
+<p>Eventually the CPU resumes instructions execution starting from the first instruction after
+<tt class="docutils literal">mwait</tt>. Even though there is a pending interrupt, the CPU does not handle it yet, because
+interrupts are disabled.</p>
 <p><strong>Step 5: wake latency</strong></p>
-<p><em>Wult</em> driver will send the datapoint (<em>TAI</em>, <em>TBI</em> and other data) to user-space and start a new
-experiment, also referred to as a &quot;measurement cycle&quot;.</p>
-<p><em>Wult</em> user-space components will eventually receive the datapoint, calculate <em>SilentTime</em> and
-<em>WakeLatency</em>, and save them in a CSV file.</p>
-<p>The process is repeated until <em>wult</em> collects the required amount of datapoints.</p>
-<p><em>SilentTime</em> = <em>LTime</em> - <em>TBI</em>, and this is the time between <tt class="docutils literal">mwait</tt> and the delayed event, modulo
-the <em>TBI</em> overhead (it takes time to get <em>TBI</em>, and there are other instructions between <em>TBI</em> read
-and <tt class="docutils literal">mwait</tt>).</p>
-<p><em>WakeLatency</em> = <em>TAI</em> - <em>LTime</em>, and this is the time between the delayed event and CPU execution
-resume, modulo the <em>TAI</em> overhead (it takes time to get <em>TAI</em>, and there are other instructions
-between the first executed instruction and the <em>TAI</em> read).</p>
+<p>Shortly after the CPU wakes up, <em>wult</em> driver takes the &quot;Time After Idle&quot; time-stamp, also referred
+to as &quot;<em>TAI</em>&quot;.</p>
+<p><em>TAI</em>, <em>TBI</em>, and <em>LTime</em> are used for calculating <em>WakeLatency</em> and <em>SilentTime</em>:</p>
+<ul class="simple">
+<li><em>WakeLatency</em> = <em>TAI</em> - <em>LTime</em></li>
+<li><em>SilentTime</em> = <em>LTime</em> - <em>TBI</em></li>
+</ul>
+<p><em>WakeLatency</em> is the time between the delayed event and CPU execution resume, modulo the <em>TAI</em>
+overhead (it takes time to get <em>TAI</em>, and there are other instructions between the first executed
+instruction and the <em>TAI</em> read). In other words, this is an approximation of C-state exit latency.</p>
+<p><em>SilentTime</em> is the time between <tt class="docutils literal">mwait</tt> and the delayed event, modulo the <em>TBI</em> overhead (it
+takes time to get <em>TBI</em>, and there are other instructions between <em>TBI</em> read and <tt class="docutils literal">mwait</tt>). In
+other words, this is the time the CPU stayed.</p>
+<p><strong>Step 6: interrupt latency</strong></p>
+<p>The CPU continues executing the Linux &quot;cpuidle&quot; subsystem code, doing a bit of housekeeping (e.g.,
+take some C-states statistics). Then the interrupts get enabled (the <tt class="docutils literal">sti</tt> instruction on Intel
+CPUs), and the CPU jumps to the interrupt handler.</p>
+<p>In the interrupt handler <em>wult</em> will take the &quot;Time in Interrupt&quot; time-stamp, also known as
+&quot;<em>TIntr</em>&quot;. This time-stamp is used for calculating Interrupt Latency, also known as &quot;<em>IntrLatency</em>&quot;.</p>
+<ul class="simple">
+<li><em>IntrLatency</em> = <em>TIntr</em> - <em>LTime</em></li>
+</ul>
+<p>IntrLatency* is the time between the delayed event and the moment CPU reaches delayed event's
+interrupt handler, modulo the Linux &quot;cpuidle&quot; subsystem and generic interrupt handling subsystem
+overhead. In other words, this is an approximation of interrupt latency.</p>
 </div>
 </div>
 <div class="section" id="interrupt-source">
@@ -205,8 +219,8 @@ cycle, so this is a very high-resolution timer.</p>
 <p>On older Intel CPUs, the LAPIC block does not support TSC deadline timers, in which case Linux
 kernel uses coarser &quot;LAPIC timers&quot;. Linux kernel may fall-back to using LAPIC timers if it detects
 that TSC is unstable or if Linux TSC deadline timers support was disabled by the user.</p>
-<p>This <em>hrt</em> <em>wult</em> method should work with both TSC deadline and legacy LAPIC timers. The <em>tdt</em> wult
-method works only with TSC deadline timers.</p>
+<p>This <em>hrt</em> <em>wult</em> method should work with both TSC deadline and legacy LAPIC timers. The <em>tdt</em>
+<em>wult</em> method works only with TSC deadline timers.</p>
 <img alt="Timer interrupt illustration." src="../images/wult-irq-source-timer.jpg" />
 <p>The picture illustrates a timer interrupt on an Intel Xeon chip. The chip contains many cores,
 but only one core is being measured (if hyper-threading is enabled, one hyper-thread is measured).
