@@ -188,7 +188,7 @@ overhead (it takes time to get <em>TAI</em>, and there are other instructions be
 instruction and the <em>TAI</em> read). In other words, this is an approximation of C-state exit latency.</p>
 <p><em>SilentTime</em> is the time between <tt class="docutils literal">mwait</tt> and the delayed event, modulo the <em>TBI</em> overhead (it
 takes time to get <em>TBI</em>, and there are other instructions between <em>TBI</em> read and <tt class="docutils literal">mwait</tt>). In
-other words, this is the time the CPU stayed.</p>
+other words, this is approximate time the CPU stayed idle.</p>
 <p><strong>Step 6: interrupt latency</strong></p>
 <p>The CPU continues executing the Linux &quot;cpuidle&quot; subsystem code, doing a bit of housekeeping (e.g.,
 take some C-states statistics). Then the interrupts get enabled (the <tt class="docutils literal">sti</tt> instruction on Intel
